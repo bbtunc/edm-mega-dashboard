@@ -3,199 +3,149 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>İST-DEĞER PRO | Kurumsal Değerleme Sistemi</title>
-    
+    <title>İstanbul Gayrimenkul Değerleme Dashboard | TÜİK Analizi</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-
     <style>
-        body { background: #0f172a; color: #e2e8f0; font-family: 'Inter', sans-serif; overflow-x: hidden; }
-        #map-container { height: 500px; width: 100%; border-radius: 12px; z-index: 10; border: 2px solid #334155; }
-        .api-card { background: #1e293b; border: 1px solid #334155; padding: 1rem; border-radius: 0.75rem; }
-        .status-online { color: #10b981; font-size: 0.7rem; display: flex; items-center: center; gap: 4px; }
-        .search-panel { background: rgba(30, 41, 59, 0.9); backdrop-filter: blur(8px); }
+        #map { height: 500px; border-radius: 12px; }
+        .stat-card { @apply bg-white p-6 rounded-xl shadow-sm border border-gray-100; }
     </style>
 </head>
-<body>
+<body class="bg-gray-50 font-sans text-gray-800">
 
-    <nav class="border-b border-slate-800 bg-slate-900 px-6 py-3 flex justify-between items-center sticky top-0 z-[1000]">
-        <div class="flex items-center gap-3">
-            <div class="bg-red-700 p-2 rounded text-white font-bold tracking-tighter">T.C. İSTANBUL</div>
-            <div>
-                <h1 class="text-sm font-bold uppercase">Emlak ve Değerleme Müdürlüğü</h1>
-                <div class="status-online"><i class="fas fa-shield-check"></i> USOM & NVİ Bağlantısı Aktif</div>
+    <div class="min-h-screen flex">
+        <main class="flex-1 p-8">
+            <header class="flex justify-between items-center mb-8">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900">İstanbul Emlak Analiz Paneli</h1>
+                    <p class="text-sm text-gray-500">TÜİK Veri Entegrasyonu: 2021-2026 Projeksiyonu</p>
+                </div>
+                <div class="flex space-x-2">
+                    <span class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium">İstanbul Geneli</span>
+                </div>
+            </header>
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div class="stat-card">
+                    <h3 class="text-gray-400 text-xs font-bold uppercase">Bu Ay Toplam Satış</h3>
+                    <p class="text-2xl font-bold text-blue-600">28.450</p>
+                    <span class="text-green-500 text-xs">↑ %4.2 (Geçen aya göre)</span>
+                </div>
+                <div class="stat-card">
+                    <h3 class="text-gray-400 text-xs font-bold uppercase">Yıllık Ortalama Değişim</h3>
+                    <p class="text-2xl font-bold text-orange-600">%112.4</p>
+                    <span class="text-gray-400 text-xs">TÜİK Konut Fiyat Endeksi</span>
+                </div>
+                <div class="stat-card">
+                    <h3 class="text-gray-400 text-xs font-bold uppercase">İnşaat Maliyet Artışı</h3>
+                    <p class="text-2xl font-bold text-red-600">%68.2</p>
+                    <span class="text-sm text-gray-500">Son 6 Aylık Trend</span>
+                </div>
+                <div class="stat-card">
+                    <h3 class="text-gray-400 text-xs font-bold uppercase">Stok Tahmini</h3>
+                    <p class="text-2xl font-bold text-gray-800">12.100</p>
+                    <span class="text-sm text-gray-500">Yeni Yapı İzinleri</span>
+                </div>
             </div>
-        </div>
-        <div class="hidden lg:flex gap-6 text-xs font-mono">
-            <span class="text-green-400">USD: 31.42 ₺</span>
-            <span class="text-yellow-400">ALTIN: 2.150 ₺</span>
-            <span class="text-blue-400">BIST: 9.120</span>
-        </div>
-    </nav>
 
-    <div class="max-w-[1600px] mx-auto p-4 grid grid-cols-12 gap-4">
-        
-        <div class="col-span-12 lg:col-span-3 space-y-4">
-            <div class="api-card border-l-4 border-blue-500">
-                <h3 class="text-xs font-bold text-blue-400 uppercase mb-3"><i class="fas fa-search-location mr-2"></i> Ada/Parsel Sorgulama</h3>
-                <div class="space-y-2">
-                    <select id="ilce" class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-sm">
-                        <option>İlçe Seçiniz (Tüm İstanbul)</option>
-                        <option value="besiktas">Beşiktaş</option>
-                        <option value="kadikoy">Kadıköy</option>
-                    </select>
-                    <div class="flex gap-2">
-                        <input type="text" id="ada" placeholder="Ada" class="w-1/2 bg-slate-800 border border-slate-700 rounded p-2 text-sm">
-                        <input type="text" id="parsel" placeholder="Parsel" class="w-1/2 bg-slate-800 border border-slate-700 rounded p-2 text-sm">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <h3 class="text-lg font-bold mb-4 italic text-blue-800">İlçe Bazlı Değerleme Haritası (Heatmap)</h3>
+                    <div id="map"></div>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <h3 class="text-lg font-bold mb-4">Satış Trendi (5 Yıl - 1 Yıl - 6 Ay)</h3>
+                    <canvas id="trendChart"></canvas>
+                    <div class="mt-4 flex justify-center space-x-4">
+                        <button onclick="updateChart('5y')" class="text-xs px-3 py-1 bg-gray-200 rounded">5 Yıl</button>
+                        <button onclick="updateChart('1y')" class="text-xs px-3 py-1 bg-gray-200 rounded">1 Yıl</button>
+                        <button onclick="updateChart('6m')" class="text-xs px-3 py-1 bg-gray-200 rounded">6 Ay</button>
                     </div>
-                    <button onclick="sorgula()" class="w-full bg-blue-600 hover:bg-blue-500 py-2 rounded font-bold text-sm transition">SORGULA</button>
                 </div>
             </div>
 
-            <div class="api-card">
-                <h3 class="text-xs font-bold text-slate-400 uppercase mb-2">Konut Fiyat Endeksi (TCMB)</h3>
-                <canvas id="financeChart" height="120"></canvas>
-            </div>
-
-            <div class="api-card border-l-4 border-red-500">
-                <h3 class="text-xs font-bold text-red-500 uppercase mb-2"><i class="fas fa-bullseye mr-2"></i> Son Depremler</h3>
-                <div id="earthquake-list" class="text-[10px] space-y-1">
-                    <div class="bg-slate-800 p-1 rounded">Marmara Denizi - 2.8 ML (12 dk önce)</div>
-                    <div class="bg-slate-800 p-1 rounded">Bolu - 1.5 ML (45 dk önce)</div>
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <h3 class="text-lg font-bold mb-4 text-emerald-800">Maliyet vs Satış Fiyatı Korelasyonu (TÜİK İlişkilendirme)</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-gray-50 text-gray-600">
+                            <tr>
+                                <th class="p-4">Dönem</th>
+                                <th class="p-4">Konut Satış Adedi</th>
+                                <th class="p-4">İnşaat Maliyet Endeksi</th>
+                                <th class="p-4">Metrekare Birim Fiyat (Ort)</th>
+                                <th class="p-4">Değişim (%)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            </tbody>
+                    </table>
                 </div>
             </div>
-        </div>
-
-        <div class="col-span-12 lg:col-span-6 space-y-4">
-            <div class="relative">
-                <div id="map-container"></div>
-                <div class="absolute top-4 right-4 z-[1000] flex flex-col gap-2">
-                    <button class="bg-white text-slate-900 p-2 rounded shadow-lg hover:bg-blue-100" title="İBB Trafik"><i class="fas fa-car"></i></button>
-                    <button class="bg-white text-slate-900 p-2 rounded shadow-lg hover:bg-blue-100" title="Nöbetçi Eczane"><i class="fas fa-pills text-red-600"></i></button>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-3 gap-4">
-                <div class="api-card text-center">
-                    <i class="fas fa-bus text-blue-400 mb-1"></i>
-                    <p class="text-[10px] opacity-60">İBB ULAŞIM</p>
-                    <p class="text-xs font-bold">Normal</p>
-                </div>
-                <div class="api-card text-center">
-                    <i class="fas fa-cloud-sun text-yellow-500 mb-1"></i>
-                    <p class="text-[10px] opacity-60">HAVA DURUMU</p>
-                    <p class="text-xs font-bold">14°C / Açık</p>
-                </div>
-                <div class="api-card text-center">
-                    <i class="fas fa-mosque text-emerald-500 mb-1"></i>
-                    <p class="text-[10px] opacity-60">NAMAZ VAKİTLERİ</p>
-                    <p class="text-xs font-bold">İkindi 15:52</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-span-12 lg:col-span-3 space-y-4">
-            <div class="api-card">
-                <h3 class="text-xs font-bold text-purple-400 uppercase mb-3">Bölgesel Donatı Analizi</h3>
-                <div class="space-y-2 text-xs">
-                    <div class="flex justify-between"><span>E-Devlet Okul Mesafesi</span><span class="font-bold">850m</span></div>
-                    <div class="flex justify-between"><span>Hastane Kapasitesi</span><span class="text-green-400 font-bold">%72 Boş</span></div>
-                    <div class="flex justify-between"><span>Yeşil Alan Oranı</span><span class="font-bold">%12</span></div>
-                </div>
-            </div>
-
-            <div class="api-card">
-                <h3 class="text-xs font-bold text-yellow-500 uppercase mb-2">Gündem Haberleri</h3>
-                <div class="text-[11px] space-y-2 opacity-80" id="news-feed">
-                    <p>• İstanbul'da yeni metro hattı açılıyor...</p>
-                    <p>• Gayrimenkul vergi düzenlemesi yolda...</p>
-                </div>
-            </div>
-
-            <div class="api-card border-t-2 border-pink-500">
-                <h3 class="text-xs font-bold text-pink-500 uppercase mb-2">Ticari Hareketlilik</h3>
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-[10px]">Online Sipariş Yoğunluğu</span>
-                    <span class="text-xs font-bold text-pink-400">%82</span>
-                </div>
-                <div class="w-full bg-slate-700 h-1.5 rounded">
-                    <div class="bg-pink-500 h-1.5 w-[82%]"></div>
-                </div>
-                <div class="mt-3 flex justify-between text-[10px] opacity-60">
-                    <span>Havalimanı: 42dk</span>
-                    <span>TCDD: 15dk</span>
-                </div>
-            </div>
-        </div>
+        </main>
     </div>
 
     <script>
-        // --- 1. HARİTA KURULUMU (ANINDA ÇALIŞIR) ---
-        var map = L.map('map-container').setView([41.0082, 28.9784], 10);
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-            attribution: '© OpenStreetMap | İST-DEĞER API'
-        }).addTo(map);
+        // Harita Başlatma (İstanbul Koordinatları)
+        const map = L.map('map').setView([41.0082, 28.9784], 10);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-        // --- 2. ADA PARSEL SORGULAMA SİMÜLASYONU ---
-        function sorgula() {
-            const ilce = document.getElementById('ilce').value;
-            const ada = document.getElementById('ada').value;
-            const parsel = document.getElementById('parsel').value;
+        // Örnek İlçe Verisi (Esenyurt, Kadıköy, Beşiktaş gibi noktalar)
+        const districts = [
+            { name: "Esenyurt", lat: 41.0343, lng: 28.6801, sales: 2500 },
+            { name: "Kadıköy", lat: 40.9910, lng: 29.0270, sales: 1200 },
+            { name: "Beşiktaş", lat: 41.0428, lng: 29.0075, sales: 850 }
+        ];
 
-            if(!ada || !parsel) {
-                alert("Lütfen Ada ve Parsel numaralarını giriniz!");
-                return;
-            }
+        districts.forEach(d => {
+            L.circle([d.lat, d.lng], {
+                color: 'red', fillOpacity: 0.5, radius: d.sales * 2
+            }).bindPopup(`${d.name}: ${d.sales} Satış (Bu Ay)`).addTo(map);
+        });
 
-            // Örnek: Beşiktaş bölgesine odaklan
-            const lat = 41.0422 + (Math.random() * 0.01);
-            const lng = 29.0085 + (Math.random() * 0.01);
-
-            map.setView([lat, lng], 17);
-            L.marker([lat, lng]).addTo(map)
-                .bindPopup(`<b>Ada: ${ada} / Parsel: ${parsel}</b><br>İlçe: ${ilce}<br>Değerleme: Bekleniyor...`)
-                .openPopup();
-        }
-
-        // --- 3. FİNANS GRAFİĞİ (TCMB & Endeks) ---
-        const ctx = document.getElementById('financeChart').getContext('2d');
-        new Chart(ctx, {
+        // Grafik Mantığı
+        const ctx = document.getElementById('trendChart').getContext('2d');
+        let trendChart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: ['Oca', 'Şub', 'Mar', 'Nis'],
+                labels: ['2021', '2022', '2023', '2024', '2025', '2026'],
                 datasets: [{
-                    label: 'Değer Artışı',
-                    data: [100, 115, 140, 185],
-                    borderColor: '#3b82f6',
-                    borderWidth: 2,
-                    pointRadius: 0,
+                    label: 'İstanbul Konut Satışları',
+                    data: [180000, 210000, 195000, 205000, 220000, 235000],
+                    borderColor: '#2563eb',
+                    tension: 0.4,
                     fill: true,
-                    backgroundColor: 'rgba(59, 130, 246, 0.1)'
+                    backgroundColor: 'rgba(37, 99, 235, 0.1)'
                 }]
-            },
-            options: {
-                responsive: true,
-                plugins: { legend: { display: false } },
-                scales: { 
-                    x: { ticks: { color: '#475569', size: 10 }, grid: { display: false } },
-                    y: { display: false }
-                }
             }
         });
 
-        // --- 4. API BİLGİLENDİRMESİ ---
-        // Repodaki kategorilerin tümü kullanıldı:
-        // 1. Finans (TCMB) -> Grafik
-        // 2. Belediye (İBB) -> Harita & Ulaşım
-        // 3. Sağlık (Eczane/Hastane) -> Sosyal Donatı
-        // 4. Güvenlik (Deprem/USOM) -> Risk Paneli
-        // 5. Haber (TRT/Haberler) -> Sağ Panel
-        // 6. Ulaşım (THY/İGA) -> Lojistik Verisi
-        // 7. Eğitim (E-Devlet/Okul) -> Sosyal Donatı
-        // 8. T.C. Servisleri (NVİ/Ada Parsel) -> Sorgulama Modülü
+        function updateChart(period) {
+            // Burada TÜİK verilerine göre data update edilecek
+            alert(period + " verileri için TÜİK CSV/API bağlantısı bekleniyor.");
+        }
+
+        // Tablo Verisi (Örnek)
+        const tableData = [
+            { period: "Aralık 2025", sales: "24.120", cost: "1120.5", price: "45.000 TL", change: "+%2.1" },
+            { period: "Kasım 2025", sales: "22.400", cost: "1105.2", price: "44.100 TL", change: "+%1.8" }
+        ];
+
+        const tableBody = document.getElementById('tableBody');
+        tableData.forEach(row => {
+            tableBody.innerHTML += `
+                <tr class="border-t border-gray-50 hover:bg-gray-50">
+                    <td class="p-4 font-medium">${row.period}</td>
+                    <td class="p-4">${row.sales}</td>
+                    <td class="p-4">${row.cost}</td>
+                    <td class="p-4 font-bold text-blue-700">${row.price}</td>
+                    <td class="p-4 text-green-600">${row.change}</td>
+                </tr>
+            `;
+        });
     </script>
 </body>
 </html>

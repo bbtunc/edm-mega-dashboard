@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>İST-DEĞER | İstanbul Değerleme Portal v2.0</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <style>
+        #main-map { height: 600px; border-radius: 1rem; z-index: 1; }
+        .sidebar-scroll { max-height: calc(100vh - 100px); overflow-y: auto; }
+        .stat-card { transition: transform 0.2s; }
+        .stat-card:hover { transform: translateY(-5px); }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans leading-normal tracking-normal">
+
+    <nav class="bg-slate-900 p-4 shadow-2xl sticky top-0 z-50">
+        <div class="container mx-auto flex flex-wrap items-center justify-between">
+            <div class="flex items-center text-white mr-6">
+                <span class="font-bold text-2xl tracking-tight text-blue-400">İST<span class="text-white">-DEĞER</span></span>
+                <span class="ml-4 text-xs border border-blue-500 px-2 py-1 rounded">Emlak ve Değerleme Müdürlüğü</span>
+            </div>
+            <div id="live-clock" class="text-blue-200 font-mono hidden md:block"></div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto mt-6 px-4">
+        <div class="grid grid-cols-12 gap-6">
+            
+            <div class="col-span-12 lg:col-span-3 space-y-6 sidebar-scroll">
+                
+                <div class="bg-white rounded-2xl shadow-lg p-5 border-t-4 border-green-500">
+                    <h3 class="font-bold text-gray-700 mb-4 flex items-center gap-2">
+                        <i class="fas fa-chart-line text-green-500"></i> Ekonomik Veriler
+                    </h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center bg-gray-50 p-2 rounded">
+                            <span class="text-sm">USD/TRY</span>
+                            <span id="usd-rate" class="font-bold text-red-600">Yükleniyor...</span>
+                        </div>
+                        <div class="flex justify-between items-center bg-gray-50 p-2 rounded">
+                            <span class="text-sm">Konut Fiyat End.</span>
+                            <span class="font-bold text-blue-600">%84.2</span>
+                        </div>
+                        <div class="flex justify-between items-center bg-gray-50 p-2 rounded">
+                            <span class="text-sm">Akaryakıt (Litre)</span>
+                            <span class="font-bold text-gray-700">42.15 ₺</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-lg p-5 border-t-4 border-red-500">
+                    <h3 class="font-bold text-gray-700 mb-4 flex items-center gap-2">
+                        <i class="fas fa-house-damage text-red-500"></i> Son Depremler
+                    </h3>
+                    <div id="earthquake-list" class="text-xs space-y-2">
+                        <div class="p-2 bg-red-50 rounded">Marmara Denizi - 2.4 ML (Az Önce)</div>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-blue-500 to-blue-700 text-white rounded-2xl shadow-lg p-5">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-sm opacity-80">İstanbul</p>
+                            <h4 id="temp" class="text-3xl font-bold">14°C</h4>
+                        </div>
+                        <i class="fas fa-cloud-sun text-4xl"></i>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-blue-400 text-xs">
+                        <p id="prayer-time">Sıradaki Vakit: İkindi (15:42)</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-span-12 lg:col-span-6">
+                <div class="bg-white rounded-2xl shadow-xl p-4 relative">
+                    <div class="absolute top-8 right-8 z-[1000] flex flex-col gap-2">
+                        <button onclick="loadLayer('ispark')" class="bg-white p-2 rounded-full shadow hover:bg-blue-500 hover:text-white transition">
+                            <i class="fas fa-parking"></i>
+                        </button>
+                        <button onclick="loadLayer('pharmacy')" class="bg-white p-2 rounded-full shadow hover:bg-red-500 hover:text-white transition">
+                            <i class="fas fa-pills"></i>
+                        </button>
+                    </div>
+                    <div id="main-map"></div>
+                    <div class="grid grid-cols-4 gap-4 mt-6">
+                        <div class="text-center p-2 bg-blue-50 rounded-xl">
+                            <p class="text-[10px] text-gray-500 uppercase">İBB Trafik</p>
+                            <p class="font-bold text-orange-500">%42</p>
+                        </div>
+                        <div class="text-center p-2 bg-blue-50 rounded-xl">
+                            <p class="text-[10px] text-gray-500 uppercase">Aktif İlan</p>
+                            <p class="font-bold text-blue-600">12.4k</p>
+                        </div>
+                        <div class="text-center p-2 bg-blue-50 rounded-xl">
+                            <p class="text-[10px] text-gray-500 uppercase">Hava Kalitesi</p>
+                            <p class="font-bold text-green-500">İyi</p>
+                        </div>
+                        <div class="text-center p-2 bg-blue-50 rounded-xl">
+                            <p class="text-[10px] text-gray-500 uppercase">Toplu Taşıma</p>
+                            <p class="font-bold text-blue-800">Normal</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-span-12 lg:col-span-3 space-y-6">
+                <div class="bg-white rounded-2xl shadow-lg p-5">
+                    <h3 class="font-bold text-gray-700 mb-4 border-b pb-2">Haber Akışı</h3>
+                    <div id="news-feed" class="space-y-4">
+                        <div class="group cursor-pointer">
+                            <p class="text-xs text-blue-500 font-semibold">EKONOMİ</p>
+                            <h5 class="text-sm font-medium group-hover:underline">İstanbul'da konut satışları arttı...</h5>
+                        </div>
+                        <div class="group cursor-pointer">
+                            <p class="text-xs text-red-500 font-semibold">ULAŞIM</p>
+                            <h5 class="text-sm font-medium group-hover:underline">Yeni metro hattı değerleri uçurdu.</h5>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-lg p-5">
+                    <h3 class="font-bold text-gray-700 mb-4 border-b pb-2">Birim Değer Analizi</h3>
+                    <canvas id="districtChart" height="250"></canvas>
+                </div>
+
+                <div class="bg-slate-800 text-white rounded-2xl shadow-lg p-5">
+                    <h3 class="text-sm font-bold mb-3 uppercase tracking-widest">Hızlı Sorgu</h3>
+                    <input type="text" placeholder="Parsel veya Adres No..." class="w-full bg-slate-700 border-none rounded p-2 text-sm focus:ring-2 ring-blue-500">
+                    <button class="w-full mt-2 bg-blue-600 hover:bg-blue-700 py-2 rounded font-bold transition text-sm">Sorgula</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // --- 1. HARİTA MOTORU (İBB & OpenStreetMap Verileriyle) ---
+        const map = L.map('main-map').setView([41.0082, 28.9784], 11);
+        L.tileLayer('https://{s}.tile.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+            attribution: 'İST-DEĞER v2.0 | Veriler: İBB, MGM, TCMB'
+        }).addTo(map);
+
+        // --- 2. VERİ ÇEKME SİMÜLASYONU (Repodaki API'lere Göre) ---
+        
+        // TCMB / Finans Verileri
+        async function fetchFinance() {
+            // Not: Gerçek API anahtarı gerektirir, burası repodaki formata uygun mocklanmıştır.
+            document.getElementById('usd-rate').innerText = "31.24 ₺";
+        }
+
+        // Deprem Verileri (Kandilli API)
+        async function fetchEarthquakes() {
+            const list = document.getElementById('earthquake-list');
+            // Repoda bulunan ücretsiz deprem API'leri için örnek veri
+            const data = [
+                { yer: "Silivri Açıkları", ml: "3.2", saat: "10:15" },
+                { yer: "Yalova", ml: "2.1", saat: "09:42" }
+            ];
+            list.innerHTML = data.map(eq => `
+                <div class="p-2 bg-red-50 rounded border-l-4 border-red-500">
+                    <b>${eq.ml}</b> - ${eq.yer} <span class="float-right text-gray-400">${eq.saat}</span>
+                </div>
+            `).join('');
+        }
+
+        // --- 3. GRAFİK MOTORU (İlçe Bazlı Değerleme) ---
+        const ctx = document.getElementById('districtChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Kdy', 'Bşk', 'Şiş', 'Sarı'],
+                datasets: [{
+                    label: 'm² Fiyatı (bin ₺)',
+                    data: [85, 92, 110, 145],
+                    backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444'],
+                    borderRadius: 8
+                }]
+            },
+            options: { plugins: { legend: { display: false } } }
+        });
+
+        // --- 4. ETKİLEŞİMLER ---
+        function loadLayer(type) {
+            alert(type + " katmanı İBB API üzerinden yükleniyor...");
+            // Burada repodaki İBB Otopark veya Eczane API linklerine fetch atılır
+        }
+
+        // Saat güncelleme
+        setInterval(() => {
+            const now = new Date();
+            document.getElementById('live-clock').innerText = now.toLocaleString('tr-TR');
+        }, 1000);
+
+        // Başlat
+        fetchFinance();
+        fetchEarthquakes();
+    </script>
+</body>
+</html>

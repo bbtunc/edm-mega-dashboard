@@ -3,278 +3,234 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>İstanbul Mega Emlak Değerleme Paneli</title>
+    <title>İST-DEĞERLEME | Mega Veri Paneli</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+
     <style>
-        #map { height: 500px; border-radius: 15px; z-index: 10; border: 2px solid #e2e8f0; }
-        .glass-effect { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); }
-        .stat-card { transition: transform 0.2s; cursor: pointer; }
-        .stat-card:hover { transform: translateY(-5px); }
-        .negative-trend { color: #ef4444; }
-        .positive-trend { color: #22c55e; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        #map { height: 550px; border-radius: 20px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); z-index: 1; }
+        .metric-card { transition: all 0.3s ease; border: 1px solid #f1f5f9; }
+        .metric-card:hover { transform: translateY(-2px); border-color: #3b82f6; }
+        .gradient-bg { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); }
     </style>
 </head>
-<body class="bg-slate-50 font-sans text-slate-900">
+<body class="bg-[#f8fafc]">
 
-    <div class="flex flex-col min-h-screen">
-        <nav class="bg-slate-900 text-white p-4 shadow-xl">
-            <div class="container mx-auto flex justify-between items-center">
-                <div class="flex items-center space-x-3">
-                    <div class="bg-blue-600 p-2 rounded-lg"><i class="fas fa-city text-xl"></i></div>
-                    <div>
-                        <h1 class="text-xl font-bold leading-tight uppercase tracking-widest">Mega Değerleme Paneli</h1>
-                        <p class="text-[10px] text-blue-400">TÜİK & SAHİBİNDEN ENTEGRE ANALİZ SİSTEMİ</p>
-                    </div>
-                </div>
-                <div class="hidden md:flex space-x-6 text-sm font-medium">
-                    <span class="flex items-center"><i class="fas fa-calendar-alt mr-2"></i> ŞUBAT 2026</span>
-                    <span class="flex items-center text-green-400"><i class="fas fa-sync-alt mr-2"></i> Canlı Veri Bağlantısı Aktif</span>
-                </div>
-            </div>
-        </nav>
-
-        <main class="container mx-auto p-4 md:p-6 flex-grow">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
-                <div>
-                    <h2 class="text-3xl font-black text-slate-800" id="selectedAreaTitle">İstanbul Geneli</h2>
-                    <p class="text-slate-500 font-medium">Seçili bölge için detaylı piyasa analizi ve değişim oranları.</p>
-                </div>
-                <div class="mt-4 md:mt-0">
-                    <button onclick="resetToIstanbul()" class="px-6 py-2 bg-white border-2 border-slate-200 rounded-full font-bold text-slate-600 hover:bg-slate-100 transition flex items-center">
-                        <i class="fas fa-map-marked-alt mr-2"></i> İstanbul Geneline Dön
-                    </button>
-                </div>
+    <div class="flex flex-col lg:flex-row min-h-screen">
+        <aside class="w-full lg:w-[400px] p-6 space-y-6 overflow-y-auto bg-white border-r">
+            <div class="mb-8">
+                <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">İST-DEĞERLEME <span class="text-blue-600">360</span></h1>
+                <p class="text-xs text-slate-500 font-medium uppercase tracking-widest">Emlak ve Değerleme Müdürlüğü</p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 stat-card">
-                    <div class="flex justify-between items-start mb-2">
-                        <span class="text-xs font-bold text-slate-400 uppercase">Toplam Satılık İlan</span>
-                        <i class="fas fa-home text-blue-500"></i>
-                    </div>
-                    <p class="text-3xl font-black text-slate-800" id="stat-total-listings">135,654</p>
-                    <div class="mt-2 text-xs font-bold" id="trend-12m">
-                        <span class="positive-trend"><i class="fas fa-caret-up"></i> %12.4</span> 
-                        <span class="text-slate-400 font-normal ml-1">(Son 1 Yıl)</span>
-                    </div>
-                </div>
+            <div class="bg-blue-50 p-4 rounded-2xl">
+                <h2 id="activeZone" class="text-xl font-bold text-blue-900">İstanbul Geneli</h2>
+                <p class="text-sm text-blue-600">Şubat 2026 Piyasa Analizi</p>
+            </div>
 
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 stat-card">
-                    <div class="flex justify-between items-start mb-2">
-                        <span class="text-xs font-bold text-slate-400 uppercase">TÜİK Gerçekleşen Satış</span>
-                        <i class="fas fa-handshake text-emerald-500"></i>
+            <div class="space-y-4">
+                <h3 class="text-sm font-bold text-slate-400 uppercase tracking-tighter">Piyasa Arz (Sahibinden Verisi)</h3>
+                
+                <div class="metric-card bg-white p-5 rounded-2xl shadow-sm">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm font-medium text-slate-500">Güncel İlan</span>
+                        <span id="trend-badge" class="px-2 py-1 bg-green-100 text-green-700 text-[10px] font-bold rounded-full">+%4.2</span>
                     </div>
-                    <p class="text-3xl font-black text-slate-800" id="stat-tuik-sales">18,240</p>
-                    <div class="mt-2 text-xs font-bold" id="trend-6m">
-                        <span class="positive-trend"><i class="fas fa-caret-up"></i> %4.2</span> 
-                        <span class="text-slate-400 font-normal ml-1">(Son 6 Ay)</span>
-                    </div>
-                </div>
-
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 stat-card">
-                    <div class="flex justify-between items-start mb-2">
-                        <span class="text-xs font-bold text-slate-400 uppercase">Ort. m² Birim Fiyatı</span>
-                        <i class="fas fa-lira-sign text-orange-500"></i>
-                    </div>
-                    <p class="text-3xl font-black text-slate-800" id="stat-avg-price">48,250 TL</p>
-                    <div class="mt-2 text-xs font-bold" id="trend-3m">
-                        <span class="positive-trend"><i class="fas fa-caret-up"></i> %2.1</span> 
-                        <span class="text-slate-400 font-normal ml-1">(Son 3 Ay)</span>
-                    </div>
-                </div>
-
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 stat-card bg-gradient-to-br from-blue-50 to-white">
-                    <div class="flex justify-between items-start mb-2">
-                        <span class="text-xs font-bold text-blue-800 uppercase">Piyasa Likidite Skoru</span>
-                        <i class="fas fa-chart-pie text-blue-600"></i>
-                    </div>
-                    <p class="text-3xl font-black text-blue-600" id="stat-liquidity">%13.4</p>
-                    <div class="mt-2 text-xs font-bold">
-                        <span id="analysis-text" class="text-blue-800 uppercase tracking-tighter italic font-black">STABİL PİYASA</span>
+                    <div id="mainListingCount" class="text-3xl font-black text-slate-800 mt-1">135,654</div>
+                    <div class="mt-4 grid grid-cols-3 gap-2 text-center border-t pt-4">
+                        <div>
+                            <p class="text-[10px] text-slate-400 uppercase font-bold">3 Ay</p>
+                            <p id="m3-change" class="text-sm font-bold text-emerald-600">+2.1%</p>
+                        </div>
+                        <div>
+                            <p class="text-[10px] text-slate-400 uppercase font-bold">6 Ay</p>
+                            <p id="m6-change" class="text-sm font-bold text-blue-600">+8.4%</p>
+                        </div>
+                        <div>
+                            <p class="text-[10px] text-slate-400 uppercase font-bold">1 Yıl</p>
+                            <p id="y1-change" class="text-sm font-bold text-slate-800">+12.4%</p>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
-                <div class="xl:col-span-2 space-y-6">
-                    <div class="bg-white p-4 rounded-3xl shadow-lg border border-slate-200">
-                        <div class="flex justify-between items-center mb-4 px-2">
-                            <h3 class="font-bold text-slate-700">İnteraktif İstanbul Haritası (İlçe Bazlı Kırılım)</h3>
-                            <div class="flex space-x-2">
-                                <span class="text-[10px] bg-red-100 text-red-600 px-2 py-1 rounded font-bold uppercase">Yüksek Arz</span>
-                                <span class="text-[10px] bg-blue-100 text-blue-600 px-2 py-1 rounded font-bold uppercase">Düşük Arz</span>
-                            </div>
-                        </div>
-                        <div id="map"></div>
+            <div class="space-y-4">
+                <h3 class="text-sm font-bold text-slate-400 uppercase tracking-tighter">Talep ve Satış (TÜİK Verisi)</h3>
+                <div class="metric-card bg-slate-900 p-5 rounded-2xl shadow-lg">
+                    <div class="flex justify-between items-center text-slate-400 mb-2">
+                        <span class="text-xs font-bold uppercase">Gerçekleşen Satış</span>
+                        <i class="fas fa-file-contract"></i>
                     </div>
+                    <div id="tuikSales" class="text-2xl font-bold text-white">18,240 <span class="text-xs text-slate-400 font-normal">/ ay</span></div>
+                    <div class="mt-3 bg-slate-800 h-2 rounded-full overflow-hidden">
+                        <div id="liquidityBar" class="bg-blue-500 h-full" style="width: 14%"></div>
+                    </div>
+                    <p class="text-[10px] text-slate-400 mt-2 font-medium italic">* Arzın %13.4'ü satışa dönüştü.</p>
                 </div>
+            </div>
 
-                <div class="space-y-6">
-                    <div class="bg-white p-6 rounded-3xl shadow-lg border border-slate-200">
-                        <h3 class="font-bold text-slate-800 mb-6 flex items-center">
-                            <i class="fas fa-chart-line mr-2 text-blue-600"></i> 12 Aylık Arz & Satış Trendi
-                        </h3>
-                        <div class="h-[250px]">
-                            <canvas id="trendChart"></canvas>
-                        </div>
-                    </div>
+            <div class="bg-gradient-to-br from-orange-500 to-red-600 p-5 rounded-2xl text-white shadow-xl shadow-red-100">
+                <h3 class="text-xs font-bold uppercase opacity-80">Değerleme Risk Skoru</h3>
+                <div id="riskScore" class="text-4xl font-black mt-1">4.2 <span class="text-sm font-normal">/ 10</span></div>
+                <p id="riskText" class="text-[11px] mt-2 leading-relaxed opacity-90 font-medium">Bu bölgede fiyat şişmesi (Bubble) düşük, alım iştahı dengeli.</p>
+            </div>
+        </aside>
 
-                    <div class="bg-slate-900 text-white p-6 rounded-3xl shadow-xl">
-                        <h3 class="font-bold text-blue-400 mb-4 uppercase text-sm tracking-widest">Uzman Değerleme Notu</h3>
-                        <p id="valuation-note" class="text-sm text-slate-300 leading-relaxed italic">
-                            "İstanbul genelinde arz birikimi devam ediyor. 135.654 ilan, piyasadaki doygunluğu gösterirken; TÜİK satışlarının sabit kalması, alıcıların beklemede olduğunu kanıtlıyor."
-                        </p>
-                        <div class="mt-6 pt-6 border-t border-slate-800 flex justify-between items-center">
-                            <span class="text-xs font-bold text-slate-500 italic">İST-DEĞERLEME V.2</span>
-                            <div class="flex -space-x-2">
-                                <div class="w-8 h-8 rounded-full bg-blue-500 border-2 border-slate-900"></div>
-                                <div class="w-8 h-8 rounded-full bg-emerald-500 border-2 border-slate-900"></div>
-                            </div>
-                        </div>
-                    </div>
+        <main class="flex-1 p-6 space-y-6">
+            <header class="flex justify-between items-center">
+                <h2 class="text-xl font-bold text-slate-800">İnteraktif Değerleme Haritası</h2>
+                <button onclick="resetData()" class="text-xs font-bold text-blue-600 hover:underline">TÜM İSTANBUL'U GÖSTER</button>
+            </header>
+
+            <div id="map"></div>
+
+            <div class="bg-white p-6 rounded-3xl shadow-sm border">
+                <h3 class="text-sm font-bold text-slate-800 mb-6 flex items-center">
+                    <i class="fas fa-chart-area mr-2 text-blue-500"></i> 12 Aylık Arz & Satış Trendi (Detaylı Endeks)
+                </h3>
+                <div class="h-[300px]">
+                    <canvas id="trendChart"></canvas>
                 </div>
             </div>
         </main>
     </div>
 
     <script>
-        // --- 1. VERİ YAPISI (İstanbul ve İlçeler İçin Örnek Veri Seti) ---
-        const dataStore = {
+        // --- DATA ENGINE (TÜİK & SAHİBİNDEN BİRLEŞİK) ---
+        const MASTER_DATA = {
             "İstanbul Geneli": {
-                totalListings: 135654,
-                tuikSales: 18240,
-                avgPrice: 48250,
-                history: [110000, 115000, 118000, 122000, 125000, 128000, 130000, 132000, 133000, 134500, 135000, 135654],
-                tuikHistory: [15200, 16100, 14800, 17200, 18500, 19000, 17800, 18200, 19500, 18800, 18100, 18240],
-                trends: { y1: 12.4, m6: 4.2, m3: 2.1 },
-                note: "Arzın yüksek, talebin stabil olduğu bir dönem. Nakit kraldır (Cash is King) evresi gözlemleniyor."
+                listings: 135654,
+                tuik: 18240,
+                m3: 2.1, m6: 8.4, y1: 12.4,
+                history: [112000, 115000, 118000, 122000, 125000, 128000, 129000, 131000, 132500, 134000, 135000, 135654],
+                tuikHistory: [14200, 15000, 14500, 16000, 17200, 18000, 17500, 18500, 19200, 18800, 18000, 18240],
+                risk: 4.2,
+                note: "İstanbul genelinde arz birikimi stabil, fiyatlar m² bazında enflasyonla paralel seyrediyor."
             },
             "Kağıthane": {
-                totalListings: 4250,
-                tuikSales: 840,
-                avgPrice: 38400,
-                history: [3200, 3400, 3500, 3600, 3750, 3800, 3900, 4000, 4100, 4150, 4200, 4250],
-                tuikHistory: [600, 650, 620, 700, 750, 800, 780, 810, 850, 830, 820, 840],
-                trends: { y1: 18.2, m6: 6.5, m3: 3.8 },
-                note: "Kağıthane bölgesi kentsel dönüşüm ve merkezi konumuyla arzını hızla artırıyor. Yatırım potansiyeli yüksek."
+                listings: 4250,
+                tuik: 680,
+                m3: 5.4, m6: 12.1, y1: 18.5,
+                history: [3200, 3300, 3450, 3600, 3700, 3850, 3900, 4000, 4100, 4150, 4200, 4250],
+                tuikHistory: [450, 480, 500, 520, 550, 600, 580, 620, 650, 640, 660, 680],
+                risk: 7.8,
+                note: "Kağıthane'de yeni projelerle arz %18 arttı. Bölge değerleme açısından yüksek potansiyelli."
             },
             "Kadıköy": {
-                totalListings: 8120,
-                tuikSales: 1100,
-                avgPrice: 155200,
-                history: [7100, 7200, 7400, 7500, 7600, 7700, 7800, 7900, 8000, 8050, 8100, 8120],
+                listings: 9120,
+                tuik: 1100,
+                m3: 1.2, m6: 3.5, y1: 9.8,
+                history: [8100, 8200, 8350, 8400, 8550, 8600, 8700, 8800, 8950, 9000, 9050, 9120],
                 tuikHistory: [900, 950, 920, 1000, 1050, 1100, 1080, 1120, 1150, 1130, 1110, 1100],
-                trends: { y1: 14.3, m6: 3.1, m3: 1.2 },
-                note: "Fiyat doygunluğu en yüksek bölge. Satış hızı yavaşlamış olsa da metrekare değerleri korunuyor."
+                risk: 2.1,
+                note: "Kadıköy'de arz doygunluğa ulaştı, satışlar oturmuş (stabil) bir seyir izliyor."
             }
-            // Diğer ilçeler için benzer veriler eklenebilir...
         };
 
-        // --- 2. HARİTA KURULUMU ---
-        const map = L.map('map').setView([41.0082, 28.9784], 10);
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-            attribution: '© OpenStreetMap'
-        }).addTo(map);
+        // --- MAP SYSTEM ---
+        const map = L.map('map', { zoomControl: false }).setView([41.0082, 28.9784], 10);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png').addTo(map);
+        L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-        // Örnek İlçe Markerları (Gerçek GeoJSON yerine hızlı etkileşim için)
         const districts = [
-            { name: "Kağıthane", coords: [41.0812, 28.9723] },
-            { name: "Kadıköy", coords: [40.9910, 29.0270] },
-            { name: "Esenyurt", coords: [41.0343, 28.6801] },
-            { name: "Beşiktaş", coords: [41.0428, 29.0075] },
-            { name: "Ümraniye", coords: [41.0333, 29.1013] }
+            { name: "Kağıthane", pos: [41.0812, 28.9723], color: "#3b82f6" },
+            { name: "Kadıköy", pos: [40.9910, 29.0270], color: "#8b5cf6" },
+            { name: "Beşiktaş", pos: [41.0428, 29.0075], color: "#ec4899" },
+            { name: "Esenyurt", pos: [41.0343, 28.6801], color: "#f59e0b" }
         ];
 
         districts.forEach(d => {
-            const circle = L.circle(d.coords, {
-                color: '#3b82f6',
-                fillColor: '#60a5fa',
-                fillOpacity: 0.5,
-                radius: 1200
+            const marker = L.circleMarker(d.pos, {
+                radius: 12,
+                fillColor: d.color,
+                color: "#fff",
+                weight: 3,
+                fillOpacity: 0.9
             }).addTo(map);
 
-            circle.on('click', () => updateDashboard(d.name));
-            circle.bindTooltip(d.name, { permanent: false, direction: "top" });
+            marker.on('click', () => updateDashboard(d.name));
+            marker.bindTooltip(d.name, { permanent: false, direction: 'top' });
         });
 
-        // --- 3. GRAFİK KURULUMU ---
+        // --- CHART SYSTEM ---
         const ctx = document.getElementById('trendChart').getContext('2d');
         let trendChart = new Chart(ctx, {
             type: 'line',
             data: {
                 labels: ['Şub 25', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara', 'Oca 26'],
-                datasets: [{
-                    label: 'Sahibinden Arz (İlan)',
-                    data: dataStore["İstanbul Geneli"].history,
-                    borderColor: '#2563eb',
-                    backgroundColor: 'rgba(37, 99, 235, 0.1)',
-                    fill: true,
-                    tension: 0.4
-                }, {
-                    label: 'TÜİK Satış',
-                    data: dataStore["İstanbul Geneli"].tuikHistory,
-                    borderColor: '#10b981',
-                    borderDash: [5, 5],
-                    tension: 0.1
-                }]
+                datasets: [
+                    {
+                        label: 'İlan Sayısı (Arz)',
+                        data: MASTER_DATA["İstanbul Geneli"].history,
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.05)',
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 3
+                    },
+                    {
+                        label: 'TÜİK Satış (Talep)',
+                        data: MASTER_DATA["İstanbul Geneli"].tuikHistory,
+                        borderColor: '#10b981',
+                        borderDash: [5, 5],
+                        tension: 0.1,
+                        yAxisID: 'y1'
+                    }
+                ]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { position: 'bottom' } },
-                scales: { y: { beginAtZero: false } }
+                interaction: { intersect: false, mode: 'index' },
+                scales: {
+                    y: { type: 'linear', display: true, position: 'left' },
+                    y1: { type: 'linear', display: true, position: 'right', grid: { drawOnChartArea: false } }
+                }
             }
         });
 
-        // --- 4. DASHBOARD GÜNCELLEME FONKSİYONU ---
-        function updateDashboard(areaName) {
-            const data = dataStore[areaName] || dataStore["İstanbul Geneli"]; // Veri yoksa genele dön
+        // --- CORE LOGIC (UPDATE FUNCTION) ---
+        function updateDashboard(key) {
+            const data = MASTER_DATA[key] || MASTER_DATA["İstanbul Geneli"];
             
-            // Başlık Güncelle
-            document.getElementById('selectedAreaTitle').innerText = areaName;
+            // UI Güncelleme
+            document.getElementById('activeZone').innerText = key;
+            document.getElementById('mainListingCount').innerText = data.listings.toLocaleString();
+            document.getElementById('tuikSales').innerText = data.tuik.toLocaleString() + " / ay";
             
-            // KPI Güncelle
-            document.getElementById('stat-total-listings').innerText = data.totalListings.toLocaleString();
-            document.getElementById('stat-tuik-sales').innerText = data.tuikSales.toLocaleString();
-            document.getElementById('stat-avg-price').innerText = data.avgPrice.toLocaleString() + " TL";
-            
-            // Likidite Skoru Hesapla
-            const liquidity = ((data.tuikSales / data.totalListings) * 100).toFixed(1);
-            document.getElementById('stat-liquidity').innerText = "%" + liquidity;
-            
-            // Trend Oranları
-            document.getElementById('trend-12m').innerHTML = `<span class="positive-trend"><i class="fas fa-caret-up"></i> %${data.trends.y1}</span> <span class="text-slate-400 font-normal ml-1">(Son 1 Yıl)</span>`;
-            document.getElementById('trend-6m').innerHTML = `<span class="positive-trend"><i class="fas fa-caret-up"></i> %${data.trends.m6}</span> <span class="text-slate-400 font-normal ml-1">(Son 6 Ay)</span>`;
-            document.getElementById('trend-3m').innerHTML = `<span class="positive-trend"><i class="fas fa-caret-up"></i> %${data.trends.m3}</span> <span class="text-slate-400 font-normal ml-1">(Son 3 Ay)</span>`;
+            // 3-6-12 Ay Hesaplamaları
+            document.getElementById('m3-change').innerText = (data.m3 > 0 ? "+" : "") + data.m3 + "%";
+            document.getElementById('m6-change').innerText = (data.m6 > 0 ? "+" : "") + data.m6 + "%";
+            document.getElementById('y1-change').innerText = (data.y1 > 0 ? "+" : "") + data.y1 + "%";
 
-            // Grafik Güncelle
+            // Likidite Barı
+            const liq = ((data.tuik / data.listings) * 100).toFixed(1);
+            document.getElementById('liquidityBar').style.width = (liq * 2) + "%"; // Görselleştirme amaçlı çarpan
+            
+            // Risk Skoru
+            document.getElementById('riskScore').innerText = data.risk + " / 10";
+            document.getElementById('riskText').innerText = data.note;
+
+            // Grafik Güncelleme
             trendChart.data.datasets[0].data = data.history;
             trendChart.data.datasets[1].data = data.tuikHistory;
             trendChart.update();
 
-            // Uzman Notu
-            document.getElementById('valuation-note').innerText = `"${data.note}"`;
-            
-            // Likidite Analiz Metni
-            const analysisText = document.getElementById('analysis-text');
-            if(liquidity > 15) {
-                analysisText.innerText = "HIZLI PİYASA / TALEP YÜKSEK";
-                analysisText.className = "text-emerald-600 font-black italic uppercase";
-            } else {
-                analysisText.innerText = "STABİL PİYASA / ARZ BİRİKİMİ";
-                analysisText.className = "text-blue-600 font-black italic uppercase";
-            }
+            // Harita Odaklanma
+            const dist = districts.find(d => d.name === key);
+            if(dist) map.flyTo(dist.pos, 13);
         }
 
-        function resetToIstanbul() {
+        function resetData() {
             updateDashboard("İstanbul Geneli");
-            map.setView([41.0082, 28.9784], 10);
+            map.flyTo([41.0082, 28.9784], 10);
         }
-
     </script>
 </body>
 </html>

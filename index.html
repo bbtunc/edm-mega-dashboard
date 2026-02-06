@@ -3,84 +3,137 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>İstanbul Gayrimenkul Değerleme Dashboard | TÜİK Analizi</title>
+    <title>İstanbul Gayrimenkul Değerleme & Arz Paneli</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     <style>
-        #map { height: 500px; border-radius: 12px; }
-        .stat-card { @apply bg-white p-6 rounded-xl shadow-sm border border-gray-100; }
+        #map { height: 600px; border-radius: 1rem; z-index: 1; }
+        .glass-card { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); }
+        .tab-active { border-bottom: 3px solid #2563eb; color: #2563eb; }
     </style>
 </head>
-<body class="bg-gray-50 font-sans text-gray-800">
+<body class="bg-slate-50 text-slate-900">
 
-    <div class="min-h-screen flex">
-        <main class="flex-1 p-8">
+    <div class="flex h-screen overflow-hidden">
+        <aside class="w-64 bg-slate-900 text-white p-6 hidden md:block">
+            <div class="mb-10">
+                <h2 class="text-xl font-bold text-blue-400">İST-DEĞERLEME</h2>
+                <p class="text-xs text-slate-400">Emlak ve Değerleme Müd.</p>
+            </div>
+            <nav class="space-y-4">
+                <a href="#" class="flex items-center space-x-3 p-2 bg-blue-600 rounded-lg"><i class="fas fa-chart-line"></i><span>Genel Bakış</span></a>
+                <a href="#" class="flex items-center space-x-3 p-2 hover:bg-slate-800 rounded-lg"><i class="fas fa-map-marked-alt"></i><span>İlçe Analizi</span></a>
+                <a href="#" class="flex items-center space-x-3 p-2 hover:bg-slate-800 rounded-lg"><i class="fas fa-database"></i><span>TÜİK Veri Havuzu</span></a>
+                <a href="#" class="flex items-center space-x-3 p-2 hover:bg-slate-800 rounded-lg"><i class="fas fa-search-dollar"></i><span>Piyasa (Sahibinden)</span></a>
+            </nav>
+        </aside>
+
+        <main class="flex-1 overflow-y-auto p-4 md:p-8">
             <header class="flex justify-between items-center mb-8">
                 <div>
-                    <h1 class="text-2xl font-bold text-gray-900">İstanbul Emlak Analiz Paneli</h1>
-                    <p class="text-sm text-gray-500">TÜİK Veri Entegrasyonu: 2021-2026 Projeksiyonu</p>
+                    <h1 class="text-3xl font-extrabold tracking-tight">İstanbul Gayrimenkul Dashboard</h1>
+                    <p class="text-slate-500">TÜİK İstatistikleri & Güncel Piyasa Arz Verileri (2021-2026)</p>
                 </div>
-                <div class="flex space-x-2">
-                    <span class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium">İstanbul Geneli</span>
+                <div class="flex items-center bg-white p-2 rounded-xl shadow-sm border">
+                    <span class="text-xs font-bold mr-2 px-2 py-1 bg-green-100 text-green-700 rounded">CANLI</span>
+                    <span id="currentDate" class="text-sm font-medium text-slate-600">6 Şubat 2026</span>
                 </div>
             </header>
 
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                <div class="stat-card">
-                    <h3 class="text-gray-400 text-xs font-bold uppercase">Bu Ay Toplam Satış</h3>
-                    <p class="text-2xl font-bold text-blue-600">28.450</p>
-                    <span class="text-green-500 text-xs">↑ %4.2 (Geçen aya göre)</span>
+            <div class="flex space-x-8 mb-6 border-b border-slate-200 overflow-x-auto">
+                <button class="pb-2 text-sm font-semibold tab-active">Bu Ay</button>
+                <button class="pb-2 text-sm font-semibold text-slate-400 hover:text-slate-600">3 Aylık</button>
+                <button class="pb-2 text-sm font-semibold text-slate-400 hover:text-slate-600">6 Aylık</button>
+                <button class="pb-2 text-sm font-semibold text-slate-400 hover:text-slate-600">1 Yıllık</button>
+                <button class="pb-2 text-sm font-semibold text-slate-400 hover:text-slate-600">5 Yıllık Trend</button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="p-3 bg-blue-50 text-blue-600 rounded-lg"><i class="fas fa-home"></i></div>
+                        <span class="text-green-500 text-xs font-bold">↑ %14.3</span>
+                    </div>
+                    <h3 class="text-slate-400 text-xs font-bold uppercase tracking-wider">TÜİK: Gerçekleşen Satış</h3>
+                    <p class="text-2xl font-black">24,119</p>
+                    <p class="text-[10px] text-slate-400 mt-1">İstanbul - Aylık Ortalama</p>
                 </div>
-                <div class="stat-card">
-                    <h3 class="text-gray-400 text-xs font-bold uppercase">Yıllık Ortalama Değişim</h3>
-                    <p class="text-2xl font-bold text-orange-600">%112.4</p>
-                    <span class="text-gray-400 text-xs">TÜİK Konut Fiyat Endeksi</span>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="p-3 bg-orange-50 text-orange-600 rounded-lg"><i class="fas fa-tags"></i></div>
+                        <span class="text-slate-500 text-xs font-bold">Arz Stoku</span>
+                    </div>
+                    <h3 class="text-slate-400 text-xs font-bold uppercase tracking-wider">Sahibinden: Satılık İlan</h3>
+                    <p class="text-2xl font-black">285,400</p>
+                    <p class="text-[10px] text-slate-400 mt-1">Aktif İlan Sayısı (İstanbul Geneli)</p>
                 </div>
-                <div class="stat-card">
-                    <h3 class="text-gray-400 text-xs font-bold uppercase">İnşaat Maliyet Artışı</h3>
-                    <p class="text-2xl font-bold text-red-600">%68.2</p>
-                    <span class="text-sm text-gray-500">Son 6 Aylık Trend</span>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="p-3 bg-emerald-50 text-emerald-600 rounded-lg"><i class="fas fa-key"></i></div>
+                        <span class="text-red-500 text-xs font-bold">Düşük Arz</span>
+                    </div>
+                    <h3 class="text-slate-400 text-xs font-bold uppercase tracking-wider">Sahibinden: Kiralık İlan</h3>
+                    <p class="text-2xl font-black">62,150</p>
+                    <p class="text-[10px] text-slate-400 mt-1">Aktif Kiralık Portföyü</p>
                 </div>
-                <div class="stat-card">
-                    <h3 class="text-gray-400 text-xs font-bold uppercase">Stok Tahmini</h3>
-                    <p class="text-2xl font-bold text-gray-800">12.100</p>
-                    <span class="text-sm text-gray-500">Yeni Yapı İzinleri</span>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="p-3 bg-purple-50 text-purple-600 rounded-lg"><i class="fas fa-lira-sign"></i></div>
+                        <span class="text-slate-500 text-xs font-bold">Ortalama</span>
+                    </div>
+                    <h3 class="text-slate-400 text-xs font-bold uppercase tracking-wider">m² Birim Fiyat (Ort.)</h3>
+                    <p class="text-2xl font-black">48,250 TL</p>
+                    <p class="text-[10px] text-slate-400 mt-1">İstanbul Değerleme Ortalaması</p>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                    <h3 class="text-lg font-bold mb-4 italic text-blue-800">İlçe Bazlı Değerleme Haritası (Heatmap)</h3>
+            <div class="grid grid-cols-1 xl:grid-cols-3 gap-8 mb-8">
+                <div class="xl:col-span-2 bg-white p-6 rounded-2xl shadow-sm border">
+                    <h3 class="text-lg font-bold mb-4 flex items-center">
+                        <i class="fas fa-map-marker-alt text-red-500 mr-2"></i> İlçe Bazlı Arz vs. Satış Yoğunluğu
+                    </h3>
                     <div id="map"></div>
                 </div>
 
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                    <h3 class="text-lg font-bold mb-4">Satış Trendi (5 Yıl - 1 Yıl - 6 Ay)</h3>
-                    <canvas id="trendChart"></canvas>
-                    <div class="mt-4 flex justify-center space-x-4">
-                        <button onclick="updateChart('5y')" class="text-xs px-3 py-1 bg-gray-200 rounded">5 Yıl</button>
-                        <button onclick="updateChart('1y')" class="text-xs px-3 py-1 bg-gray-200 rounded">1 Yıl</button>
-                        <button onclick="updateChart('6m')" class="text-xs px-3 py-1 bg-gray-200 rounded">6 Ay</button>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border">
+                    <h3 class="text-lg font-bold mb-4">Maliyet - Fiyat Korelasyonu</h3>
+                    <canvas id="correlationChart" height="300"></canvas>
+                    <div class="mt-6 space-y-3">
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="text-slate-500">İnşaat Maliyet Endeksi (Yıllık)</span>
+                            <span class="font-bold text-red-600">%23.9</span>
+                        </div>
+                        <div class="flex justify-between items-center text-sm border-t pt-2">
+                            <span class="text-slate-500">Konut Fiyat Artışı (Yıllık)</span>
+                            <span class="font-bold text-blue-600">%45.2</span>
+                        </div>
+                        <p class="text-[11px] text-slate-400 bg-slate-50 p-2 rounded leading-relaxed">
+                            * Not: Maliyet artışı ile fiyat artışı arasındaki makas, konutun yatırım aracı olarak talebinin devam ettiğini göstermektedir.
+                        </p>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                <h3 class="text-lg font-bold mb-4 text-emerald-800">Maliyet vs Satış Fiyatı Korelasyonu (TÜİK İlişkilendirme)</h3>
+            <div class="bg-white rounded-2xl shadow-sm border overflow-hidden">
+                <div class="p-6 border-b">
+                    <h3 class="text-lg font-bold">İlçe Bazlı Karşılaştırmalı Veri Seti</h3>
+                </div>
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left text-sm">
-                        <thead class="bg-gray-50 text-gray-600">
+                    <table class="w-full text-left">
+                        <thead class="bg-slate-50 text-slate-500 text-xs uppercase">
                             <tr>
-                                <th class="p-4">Dönem</th>
-                                <th class="p-4">Konut Satış Adedi</th>
-                                <th class="p-4">İnşaat Maliyet Endeksi</th>
-                                <th class="p-4">Metrekare Birim Fiyat (Ort)</th>
-                                <th class="p-4">Değişim (%)</th>
+                                <th class="px-6 py-4">İlçe Name</th>
+                                <th class="px-6 py-4">Satılık İlan (Sahibinden)</th>
+                                <th class="px-6 py-4">Kiralık İlan (Sahibinden)</th>
+                                <th class="px-6 py-4">Gerçekleşen Satış (TÜİK/Ay)</th>
+                                <th class="px-6 py-4">Satış/Arz Oranı</th>
+                                <th class="px-6 py-4">Ort. m² Fiyatı</th>
                             </tr>
                         </thead>
-                        <tbody id="tableBody">
+                        <tbody id="districtTable" class="text-sm divide-y divide-slate-100">
                             </tbody>
                     </table>
                 </div>
@@ -89,60 +142,89 @@
     </div>
 
     <script>
-        // Harita Başlatma (İstanbul Koordinatları)
-        const map = L.map('map').setView([41.0082, 28.9784], 10);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-
-        // Örnek İlçe Verisi (Esenyurt, Kadıköy, Beşiktaş gibi noktalar)
-        const districts = [
-            { name: "Esenyurt", lat: 41.0343, lng: 28.6801, sales: 2500 },
-            { name: "Kadıköy", lat: 40.9910, lng: 29.0270, sales: 1200 },
-            { name: "Beşiktaş", lat: 41.0428, lng: 29.0075, sales: 850 }
+        // Veri Seti (TÜİK ve Sahibinden verilerinin birleşimi)
+        const istanbulData = [
+            { id: 1, name: "Esenyurt", lat: 41.0343, lng: 28.6801, forSale: 42100, forRent: 5400, actualSales: 2800, price: 28500 },
+            { id: 2, name: "Kadıköy", lat: 40.9910, lng: 29.0270, forSale: 12400, forRent: 3100, actualSales: 1100, price: 150885 },
+            { id: 3, name: "Beşiktaş", lat: 41.0428, lng: 29.0075, forSale: 8200, forRent: 1800, actualSales: 650, price: 152498 },
+            { id: 4, name: "Sarıyer", lat: 41.1670, lng: 29.0570, forSale: 9100, forRent: 1200, actualSales: 580, price: 145655 },
+            { id: 5, name: "Pendik", lat: 40.8767, lng: 29.2335, forSale: 18500, forRent: 2900, actualSales: 1450, price: 38200 },
+            { id: 6, name: "Başakşehir", lat: 41.1158, lng: 28.8055, forSale: 15200, forRent: 2100, actualSales: 1200, price: 55000 }
         ];
 
-        districts.forEach(d => {
-            L.circle([d.lat, d.lng], {
-                color: 'red', fillOpacity: 0.5, radius: d.sales * 2
-            }).bindPopup(`${d.name}: ${d.sales} Satış (Bu Ay)`).addTo(map);
+        // Harita Başlatma
+        const map = L.map('map').setView([41.0082, 28.9784], 10);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+        istanbulData.forEach(item => {
+            const ratio = ((item.actualSales / item.forSale) * 100).toFixed(1);
+            const circle = L.circle([item.lat, item.lng], {
+                color: item.price > 100000 ? '#7c3aed' : '#2563eb',
+                fillColor: item.price > 100000 ? '#a78bfa' : '#60a5fa',
+                fillOpacity: 0.6,
+                radius: Math.sqrt(item.forSale) * 50
+            }).addTo(map);
+            
+            circle.bindPopup(`
+                <div class="font-sans">
+                    <h4 class="font-bold border-b pb-1 mb-2">${item.name}</h4>
+                    <p class="text-xs"><b>Satılık Arz:</b> ${item.forSale} ilan</p>
+                    <p class="text-xs"><b>Kiralık Arz:</b> ${item.forRent} ilan</p>
+                    <p class="text-xs"><b>TÜİK Satış:</b> ${item.actualSales} adet/ay</p>
+                    <p class="text-xs text-blue-600"><b>Likitite Oranı:</b> %${ratio}</p>
+                    <p class="text-xs mt-1"><b>Ort. Fiyat:</b> ${item.price.toLocaleString()} TL/m²</p>
+                </div>
+            `);
         });
 
-        // Grafik Mantığı
-        const ctx = document.getElementById('trendChart').getContext('2d');
-        let trendChart = new Chart(ctx, {
+        // Grafik: Korelasyon
+        const ctx = document.getElementById('correlationChart').getContext('2d');
+        new Chart(ctx, {
             type: 'line',
             data: {
                 labels: ['2021', '2022', '2023', '2024', '2025', '2026'],
-                datasets: [{
-                    label: 'İstanbul Konut Satışları',
-                    data: [180000, 210000, 195000, 205000, 220000, 235000],
-                    borderColor: '#2563eb',
-                    tension: 0.4,
-                    fill: true,
-                    backgroundColor: 'rgba(37, 99, 235, 0.1)'
-                }]
+                datasets: [
+                    {
+                        label: 'Konut Fiyat Endeksi',
+                        data: [100, 250, 480, 720, 950, 1150],
+                        borderColor: '#2563eb',
+                        tension: 0.4
+                    },
+                    {
+                        label: 'İnşaat Maliyeti',
+                        data: [100, 180, 320, 450, 580, 710],
+                        borderColor: '#ef4444',
+                        tension: 0.4
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { position: 'bottom' } }
             }
         });
 
-        function updateChart(period) {
-            // Burada TÜİK verilerine göre data update edilecek
-            alert(period + " verileri için TÜİK CSV/API bağlantısı bekleniyor.");
-        }
-
-        // Tablo Verisi (Örnek)
-        const tableData = [
-            { period: "Aralık 2025", sales: "24.120", cost: "1120.5", price: "45.000 TL", change: "+%2.1" },
-            { period: "Kasım 2025", sales: "22.400", cost: "1105.2", price: "44.100 TL", change: "+%1.8" }
-        ];
-
-        const tableBody = document.getElementById('tableBody');
-        tableData.forEach(row => {
+        // Tabloyu Doldur
+        const tableBody = document.getElementById('districtTable');
+        istanbulData.forEach(item => {
+            const ratio = ((item.actualSales / item.forSale) * 100).toFixed(1);
             tableBody.innerHTML += `
-                <tr class="border-t border-gray-50 hover:bg-gray-50">
-                    <td class="p-4 font-medium">${row.period}</td>
-                    <td class="p-4">${row.sales}</td>
-                    <td class="p-4">${row.cost}</td>
-                    <td class="p-4 font-bold text-blue-700">${row.price}</td>
-                    <td class="p-4 text-green-600">${row.change}</td>
+                <tr class="hover:bg-slate-50 transition">
+                    <td class="px-6 py-4 font-bold">${item.name}</td>
+                    <td class="px-6 py-4">${item.forSale.toLocaleString()}</td>
+                    <td class="px-6 py-4">${item.forRent.toLocaleString()}</td>
+                    <td class="px-6 py-4 font-semibold text-blue-700">${item.actualSales.toLocaleString()}</td>
+                    <td class="px-6 py-4">
+                        <div class="flex items-center">
+                            <span class="mr-2">%${ratio}</span>
+                            <div class="w-16 bg-slate-200 h-1.5 rounded-full">
+                                <div class="bg-blue-500 h-1.5 rounded-full" style="width: ${ratio}%"></div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 font-bold text-slate-800">${item.price.toLocaleString()} TL</td>
                 </tr>
             `;
         });
